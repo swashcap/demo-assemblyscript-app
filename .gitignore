@@ -62,3 +62,5 @@ typings/
 
 # AssemblyScript build output
 build
+
+server/**/*.js
