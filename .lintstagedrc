@@ -1,5 +1,6 @@
 {
+  "ignore": ["build/**"],
   "linters": {
-    "*.{js,json}": ["yarn format", "git add"]
+    "*.{js,json,ts}": ["yarn format", "git add"]
   }
 }

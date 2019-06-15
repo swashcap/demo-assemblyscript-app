@@ -11,11 +11,15 @@
   "devDependencies": {
     "@commitlint/cli": "^8.0.0",
     "@commitlint/config-conventional": "^8.0.0",
+    "assemblyscript": "AssemblyScript/assemblyscript",
     "husky": "^2.4.1",
     "lint-staged": "^8.2.1",
     "prettier": "^1.18.2"
   },
   "scripts": {
-    "format": "prettier --write '*.{js,json}'"
+    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized",
+    "asbuild:optimized": "asc assembly/index.ts -b build/optimized.wasm -t build/optimized.wat --sourceMap --validate --optimize",
+    "asbuild:untouched": "asc assembly/index.ts -b build/untouched.wasm -t build/untouched.wat --sourceMap --validate --debug",
+    "format": "prettier --write '*.{js,json}' 'assembly/**/*.ts'"
   }
 }
