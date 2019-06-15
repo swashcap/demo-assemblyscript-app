@@ -1,0 +1,10 @@
+{
+  "name": "demo-assemblyscript-app",
+  "version": "1.0.0",
+  "description": "A demo of AssemblyScript in web app form.",
+  "main": "index.js",
+  "repository": "git@github.com:swashcap/demo-assemblyscript-app.git",
+  "author": "Cory Reed",
+  "license": "Apache-2.0",
+  "private": true
+}
