@@ -1,6 +1,8 @@
 import 'hard-rejection/register';
 
 import fs from 'fs';
+import path from 'path';
+import loader from 'assemblyscript/lib/loader';
 import Koa from 'koa';
 import koaLogger from 'koa-logger';
 import koaCors from '@koa/cors';
@@ -8,19 +10,33 @@ import koaRoute from 'koa-route';
 
 const PORT = process.env.PORT || 3000;
 
-export const app = new Koa();
+export const getServer = async () => {
+  const app = new Koa();
 
-if (process.env.NODE_ENV !== 'test') {
-  app.use(koaLogger());
-}
+  const instance = loader.instantiate<{ hello: () => number }>(
+    new WebAssembly.Module(
+      fs.readFileSync(path.resolve(__dirname, '../build/optimized.wasm'))
+    ),
+    { env: {} }
+  );
 
-app.use(
-  koaRoute.get('/', ctx => {
-    ctx.body = 'Hello, world!';
-  })
-);
-app.use(koaCors);
+  if (process.env.NODE_ENV !== 'test') {
+    app.use(koaLogger());
+  }
+
+  app.use(
+    koaRoute.get('/', ctx => {
+      ctx.body = instance.__getString(instance.hello());
+    })
+  );
+  app.use(koaCors);
+
+  return app;
+};
 
 if (require.main === module) {
-  app.listen(PORT);
+  (async () => {
+    const app = await getServer();
+    app.listen(PORT);
+  })();
 }
