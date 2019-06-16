@@ -6,13 +6,8 @@ import loader from 'assemblyscript/lib/loader';
 import Koa from 'koa';
 import koaLogger from 'koa-logger';
 import koaCors from '@koa/cors';
-import koaRoute from 'koa-route';
 
 const PORT = process.env.PORT || 3000;
-
-interface MyModule {
-  template: (title: number) => number;
-}
 
 const myModule = new WebAssembly.Module(
   fs.readFileSync(path.resolve(__dirname, '../build/optimized.wasm'))
@@ -24,16 +19,17 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(koaLogger());
 }
 
-app.use(
-  koaRoute.get('/', ctx => {
-    const instance = loader.instantiate<MyModule>(myModule, { env: {} });
-    const title = instance.__retain(instance.__allocString('Hello, World!'));
+app.use(ctx => {
+  const instance = loader.instantiate<any>(myModule, { env: {} });
+  const method = instance.__retain(instance.__allocString(ctx.request.method));
+  const url = instance.__retain(instance.__allocString(ctx.request.url));
+  const req = new instance.Request(method, url);
 
-    ctx.body = instance.__getString(instance.template(title));
+  ctx.body = instance.__getString(instance.template(req));
 
-    instance.__release(title);
-  })
-);
+  instance.__release(method);
+  instance.__release(url);
+});
 
 app.use(koaCors);
 
