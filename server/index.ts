@@ -1,3 +1,6 @@
+import 'hard-rejection/register';
+
+import fs from 'fs';
 import Koa from 'koa';
 import koaLogger from 'koa-logger';
 import koaCors from '@koa/cors';
