@@ -10,33 +10,33 @@ import koaRoute from 'koa-route';
 
 const PORT = process.env.PORT || 3000;
 
-export const getServer = async () => {
-  const app = new Koa();
+interface MyModule {
+  template: (title: number) => number;
+}
 
-  const instance = loader.instantiate<{ template: () => number }>(
-    new WebAssembly.Module(
-      fs.readFileSync(path.resolve(__dirname, '../build/optimized.wasm'))
-    ),
-    { env: {} }
-  );
+const myModule = new WebAssembly.Module(
+  fs.readFileSync(path.resolve(__dirname, '../build/optimized.wasm'))
+);
 
-  if (process.env.NODE_ENV !== 'test') {
-    app.use(koaLogger());
-  }
+export const app = new Koa();
 
-  app.use(
-    koaRoute.get('/', ctx => {
-      ctx.body = instance.__getString(instance.template());
-    })
-  );
-  app.use(koaCors);
+if (process.env.NODE_ENV !== 'test') {
+  app.use(koaLogger());
+}
 
-  return app;
-};
+app.use(
+  koaRoute.get('/', ctx => {
+    const instance = loader.instantiate<MyModule>(myModule, { env: {} });
+    const title = instance.__retain(instance.__allocString('Hello, World!'));
+
+    ctx.body = instance.__getString(instance.template(title));
+
+    instance.__release(title);
+  })
+);
+
+app.use(koaCors);
 
 if (require.main === module) {
-  (async () => {
-    const app = await getServer();
-    app.listen(PORT);
-  })();
+  app.listen(PORT);
 }
