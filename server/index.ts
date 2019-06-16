@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 export const getServer = async () => {
   const app = new Koa();
 
-  const instance = loader.instantiate<{ hello: () => number }>(
+  const instance = loader.instantiate<{ template: () => number }>(
     new WebAssembly.Module(
       fs.readFileSync(path.resolve(__dirname, '../build/optimized.wasm'))
     ),
@@ -26,7 +26,7 @@ export const getServer = async () => {
 
   app.use(
     koaRoute.get('/', ctx => {
-      ctx.body = instance.__getString(instance.hello());
+      ctx.body = instance.__getString(instance.template());
     })
   );
   app.use(koaCors);
